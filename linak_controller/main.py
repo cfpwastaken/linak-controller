@@ -42,7 +42,8 @@ async def connect(config: Config, desk=None, attempt=0):
                 device=config["adapter_name"],
                 disconnected_callback=disconnect_callback,
             )
-            await client.connect(timeout=config["connection_timeout"])
+            if not client.is_connected:
+                await client.connect(timeout=config["connection_timeout"])
             logger.log("Connected: {}".format(config["mac_address"]))
             desk = await Desk.initialise(config, client)
             global desk_for_disconnect
@@ -149,11 +150,22 @@ async def run_tcp_forwarded_command(desk: Desk, reader, writer):
     await run_command(desk, command)
     writer.close()
 
+async def get_height(desk: Desk, request):
+    final_height, _ = await desk.get_height_speed()
+    return web.Response(text=str(final_height.human))
+
+async def set_height(desk: Desk, request):
+    height_str = request.match_info.get("height", "0")
+    if str(height_str).isnumeric():
+        await run_command(desk, {"key": Commands.move_to, "value": int(height_str)})
+    return web.Response(text="OK")
 
 async def run_http_server(desk: Desk):
     """Start a server to listen for commands via websocket connection"""
     app = web.Application()
     app.router.add_post("/", partial(run_forwarded_http_command, desk))
+    app.router.add_get("/", partial(get_height, desk))
+    app.router.add_get("/set_height/{height}", partial(set_height, desk))
     app.router.add_get("/ws", partial(run_forwarded_ws_command, desk))
     runner = web.AppRunner(app)
     await runner.setup()

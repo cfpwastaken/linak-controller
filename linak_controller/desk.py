@@ -37,14 +37,14 @@ class Desk:
         logger.log("Capabilities: {}".format(capabilities))
 
         # Read the user id
-        user_id = await DPGService.dpg_command(client, DPGService.DPG.CMD_USER_ID)
-        logger.log("User ID: {}".format(bytes_to_hex(user_id)))
-        if user_id and user_id[0] != 1:
-            # For DPG1C it is important that the first byte is set to 1
-            # The other bytes do not seem to matter
-            user_id[0] = 1
-            logger.log("Setting user ID to {}".format(bytes_to_hex(user_id)))
-            await DPGService.dpg_command(client, DPGService.DPG.CMD_USER_ID, user_id)
+#        user_id = await DPGService.dpg_command(client, DPGService.DPG.CMD_USER_ID)
+ #       logger.log("User ID: {}".format(bytes_to_hex(user_id)))
+  #      if user_id and user_id[0] != 1:
+   #         # For DPG1C it is important that the first byte is set to 1
+    #        # The other bytes do not seem to matter
+     #       user_id[0] = 1
+      #      logger.log("Setting user ID to {}".format(bytes_to_hex(user_id)))
+       #     await DPGService.dpg_command(client, DPGService.DPG.CMD_USER_ID, user_id)
 
         # Check if base height should be taken from controller
         if config["base_height"] == None:
